@@ -1,0 +1,160 @@
+I began by following along Uncle Bob's creation of a bowling game using Test Driven Development[1]. I really enjoyed this video and highly recommend it. After he completed the tutorial, I felt that there was something missing from his implementation so I decided to push this implementation further.
+
+1) The game only showed the score for the entire game; there was no way to see the score up to an individual frame.
+2) There was no way to interact with the game.
+3) There was no way to know when the game was complete.
+4) There was no way to see the actual score card.
+
+Problem number 4 gave me a perfect opportunity to use this example as a way to teach myself the Presenter Pattern[2]. I've been a Rails developer since 2005 so I've always relied on views to act as my UI with an application. Not since learning Java in college have I worried about a pattern like the Presenter Pattern so I felt it was time to put myself through my paces. Adding the Presenter Pattern to this application gave me an excuse to add tests for, and the features, that I thought were missing from the original example.
+
+To run the game, open irb from the app directory and run the following commands:
+ require './main'
+ gp = GamePresenter.new(gp)
+ gp.run
+
+From here, you'll be prompted to enter how much was rolled for each frame. The interface will build up the score card, frame by frame, until the end of the game. Here's an example running. You can see that for the 4th and 5th rolls, invalid numbers were entered, causing the application to ask for input again. To quit a game early, simply type 'exit':
+
+  What did you roll for the first roll of frame 1?
+  10
+  ___________
+  |   1|   2|
+  |----|----|
+  |  |X|  | |
+  |----|----|
+  |    |    |
+  ----------
+  What did you roll for the first roll of frame 2?
+  5
+  ___________
+  |   1|   2|
+  |----|----|
+  |  |X| 5| |
+  |----|----|
+  |    |    |
+  ----------
+  What did you roll for the second roll of frame 2?
+  5
+  ________________
+  |   1|   2|   3|
+  |----|----|----|
+  |  |X| 5|/|  | |
+  |----|----|----|
+  |  20|    |    |
+  ---------------
+  What did you roll for the first roll of frame 3?
+  10
+  _____________________
+  |   1|   2|   3|   4|
+  |----|----|----|----|
+  |  |X| 5|/|  |X|  | |
+  |----|----|----|----|
+  |  20|  40|    |    |
+  --------------------
+  What did you roll for the first roll of frame 4?
+  11
+  You entered an invalid roll: 11. Try again.
+  What did you roll for the first roll of frame 4?
+  5
+  _____________________
+  |   1|   2|   3|   4|
+  |----|----|----|----|
+  |  |X| 5|/|  |X| 5| |
+  |----|----|----|----|
+  |  20|  40|    |    |
+  --------------------
+  What did you roll for the second roll of frame 4?
+  6
+  You entered an invalid roll: 6. Try again.
+  What did you roll for the second roll of frame 4?
+  5
+  __________________________
+  |   1|   2|   3|   4|   5|
+  |----|----|----|----|----|
+  |  |X| 5|/|  |X| 5|/|  | |
+  |----|----|----|----|----|
+  |  20|  40|  60|    |    |
+  -------------------------
+  What did you roll for the first roll of frame 5?
+  9
+  __________________________
+  |   1|   2|   3|   4|   5|
+  |----|----|----|----|----|
+  |  |X| 5|/|  |X| 5|/| 9| |
+  |----|----|----|----|----|
+  |  20|  40|  60|  79|    |
+  -------------------------
+  What did you roll for the second roll of frame 5?
+  0
+  _______________________________
+  |   1|   2|   3|   4|   5|   6|
+  |----|----|----|----|----|----|
+  |  |X| 5|/|  |X| 5|/| 9|0|  | |
+  |----|----|----|----|----|----|
+  |  20|  40|  60|  79|  88|    |
+  ------------------------------
+  What did you roll for the first roll of frame 6?
+  10
+  ____________________________________
+  |   1|   2|   3|   4|   5|   6|   7|
+  |----|----|----|----|----|----|----|
+  |  |X| 5|/|  |X| 5|/| 9|0|  |X|  | |
+  |----|----|----|----|----|----|----|
+  |  20|  40|  60|  79|  88|    |    |
+  -----------------------------------
+  What did you roll for the first roll of frame 7?
+  10
+  _________________________________________
+  |   1|   2|   3|   4|   5|   6|   7|   8|
+  |----|----|----|----|----|----|----|----|
+  |  |X| 5|/|  |X| 5|/| 9|0|  |X|  |X|  | |
+  |----|----|----|----|----|----|----|----|
+  |  20|  40|  60|  79|  88|    |    |    |
+  ----------------------------------------
+  What did you roll for the first roll of frame 8?
+  10
+  ______________________________________________
+  |   1|   2|   3|   4|   5|   6|   7|   8|   9|
+  |----|----|----|----|----|----|----|----|----|
+  |  |X| 5|/|  |X| 5|/| 9|0|  |X|  |X|  |X|  | |
+  |----|----|----|----|----|----|----|----|----|
+  |  20|  40|  60|  79|  88| 118|    |    |    |
+  ---------------------------------------------
+  What did you roll for the first roll of frame 9?
+  10
+  ____________________________________________________
+  |   1|   2|   3|   4|   5|   6|   7|   8|   9|   10|
+  |----|----|----|----|----|----|----|----|----|-----|
+  |  |X| 5|/|  |X| 5|/| 9|0|  |X|  |X|  |X|  |X| | | |
+  |----|----|----|----|----|----|----|----|----|-----|
+  |  20|  40|  60|  79|  88| 118| 148|    |    |     |
+  ----------------------------------------------------
+  What did you roll for the first roll of frame 10?
+  10
+  ____________________________________________________
+  |   1|   2|   3|   4|   5|   6|   7|   8|   9|   10|
+  |----|----|----|----|----|----|----|----|----|-----|
+  |  |X| 5|/|  |X| 5|/| 9|0|  |X|  |X|  |X|  |X|X| | |
+  |----|----|----|----|----|----|----|----|----|-----|
+  |  20|  40|  60|  79|  88| 118| 148| 178|    |     |
+  ----------------------------------------------------
+  What did you roll for the second roll of frame 10?
+  10
+  ____________________________________________________
+  |   1|   2|   3|   4|   5|   6|   7|   8|   9|   10|
+  |----|----|----|----|----|----|----|----|----|-----|
+  |  |X| 5|/|  |X| 5|/| 9|0|  |X|  |X|  |X|  |X|X|X| |
+  |----|----|----|----|----|----|----|----|----|-----|
+  |  20|  40|  60|  79|  88| 118| 148| 178| 208|     |
+  ----------------------------------------------------
+  What did you roll for the third roll of frame 10?
+  10
+  ____________________________________________________
+  |   1|   2|   3|   4|   5|   6|   7|   8|   9|   10|
+  |----|----|----|----|----|----|----|----|----|-----|
+  |  |X| 5|/|  |X| 5|/| 9|0|  |X|  |X|  |X|  |X|X|X|X|
+  |----|----|----|----|----|----|----|----|----|-----|
+  |  20|  40|  60|  79|  88| 118| 148| 178| 208|  238|
+  ----------------------------------------------------
+
+[1] = http://www.cleancoders.com/codecast/clean-code-episode-6-part-2/show
+[2] = http://kpumuk.info/ruby-on-rails/simplifying-your-ruby-on-rails-code/
